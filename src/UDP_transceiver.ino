@@ -3,11 +3,11 @@
  *
  * UDP_transciever.ino
  *
- * Program nacita ID z iButtona a vytvori signal v protokole Wiegand
+ * Code for transmit state of pin from a one Arduino to another.
  *
  * @author: mr.nobody
  * @date:   marec 2016 - januar 2017
- * @version: 0.1_alfa
+ * @version: 0.1-alfa
  *
  * mr.nobody (cleft) 2017
  *
@@ -81,15 +81,14 @@ SimpleProtocol protocol;
 Packet_t packet;
 Packet_t receivePacket;
 uint8_t buffer[ sizeof( packet )];
-uint8_t receiveBuffer[ sizeof( packet )]; // buffer to hold incoming packet
+uint8_t receiveBuffer[ sizeof( packet )];   // buffer to hold incoming packet
 Ack_t ackFlag = ACK_RECEIVED;
-//uint8_t correctPacketFlag = 0;
 uint8_t data;
 uint16_t sequence;
 
 //const uint16_t DELIVERY_TIMEOUT = 10000;  // time for delivery confirmation in ms
-const uint16_t DELIVERY_DELAY = 500;      // time delay between attempting on delivery
-const uint8_t DELIVERY_ATTEMPT = 20;      // number of attempt on delivery
+const uint16_t DELIVERY_DELAY = 500;        // time delay between attempting on delivery
+const uint8_t DELIVERY_ATTEMPT = 20;        // number of attempt on delivery
 uint16_t currentDeliveryTime;
 uint8_t currentDeliveryAttempt = 0;
 
@@ -97,7 +96,6 @@ uint8_t currentDeliveryAttempt = 0;
  *=============================
  */
 void pinChangeIrqEnable();
-//void analysePacket( uint8_t *buffer, uint8_t *size );
 void analysePacket( void );
 void pinActivate( uint8_t * data );
 
@@ -108,7 +106,7 @@ void setup()
     Serial.println( F( "Start initialization !"));
   #endif
 
-  // start the Ethernet and UDP:
+  // Start the Ethernet and UDP:
   Ethernet.begin( MAC, IP_LOCAL );
   Udp.begin( LOCAL_PORT );
 
@@ -161,7 +159,7 @@ void loop() {
     #endif
   }
 
-  // if there's data available, read a packet
+  // If there's data available, read a packet
   uint8_t sizeReceivePacket = Udp.parsePacket();
   if ( sizeReceivePacket == sizeof( receiveBuffer )) {
 
@@ -192,7 +190,6 @@ void loop() {
       Serial.println( receivePacket.data, BIN );
     #endif
 
-    //analysePacket( &receiveBuffer, sizeof( receiveBuffer ));
     analysePacket();
   }
   delay(10);
