@@ -1,4 +1,4 @@
-#include "SimpleProtocol.h"
+#include "SimpleProtocol.hpp"
 
 /*******************************************************************************
  *    Function: SimpleProtocol

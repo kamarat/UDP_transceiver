@@ -45,7 +45,7 @@
 #include <Ethernet.h>
 #include <EthernetUdp.h>
 
-#include "SimpleProtocol.h"
+#include "SimpleProtocol.hpp"
 
 #define DEBUG 1
 #define MODUL 0
