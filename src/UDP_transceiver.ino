@@ -6,8 +6,9 @@
  * Code for transmit state of pin from a one Arduino to another.
  *
  * @author: mr.nobody
- * @date:   marec 2016 - januar 2017
- * @version: 0.1-alfa
+ * @date:   January 2017 - March 2017
+ *
+ * @version: [0.1.0-alfa] - 2017-03-18
  *
  * mr.nobody (cleft) 2017
  *
