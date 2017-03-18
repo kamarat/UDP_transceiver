@@ -75,6 +75,7 @@ const uint8_t INPUT_PINS_PORTC[] = { PORTC0, PORTC1, PORTC2, PORTC3, PORTC4, POR
 const uint8_t INPUT_PINS_PINC[] = { PINC0, PINC1, PINC2, PINC3, PINC4, PINC5 };
 const uint8_t INPUT_PINS_PCMSK1[] = { PCINT8, PCINT9, PCINT10, PCINT11, PCINT12, PCINT13 };
 const uint8_t OUTPUT_PINS[] = { 2, 3, 5, 6, 7, 8 };
+const uint8_t SD_CARD_SS = 4;
 uint8_t pinChangeFlag = 0;
 
 SimpleProtocol protocol;
@@ -110,15 +111,18 @@ void setup()
   Ethernet.begin( MAC, IP_LOCAL );
   Udp.begin( LOCAL_PORT );
 
-  // Pin D4 is using the Ethernet shield SD card reader like slave select pin
   for ( uint8_t pin = 0; pin < sizeof(INPUT_PINS); pin++ )
     pinMode( INPUT_PINS[ pin ], INPUT_PULLUP);
   pinChangeIrqEnable();
 
   for ( uint8_t pin = 0; pin < sizeof(OUTPUT_PINS); pin++ ) {
     pinMode( OUTPUT_PINS[ pin ], OUTPUT);
-    digitalWrite( OUTPUT_PINS[ pin ], LOW );
+    digitalWrite( OUTPUT_PINS[ pin ], HIGH );
   }
+
+  // Pin D4 is using the Ethernet shield SD card reader like slave select pin
+  pinMode( SD_CARD_SS, OUTPUT );
+  digitalWrite( SD_CARD_SS, HIGH );
 
   #if DEBUG >= 1
     Serial.println( F( "End initialization !"));
@@ -217,6 +221,7 @@ void analysePacket( void )
     case TYPE_ACK: {
       if ( receivePacket.sequence == sequence ) {
         ackFlag = ACK_RECEIVED;
+        currentDeliveryAttempt = 0;
         #if DEBUG >= 1
           Serial.println( F( "Received ACK packet." ));
         #endif
