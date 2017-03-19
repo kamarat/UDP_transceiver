@@ -1,0 +1,24 @@
+# Change Log
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](http://keepachangelog.com/)
+and this project adheres to [Semantic Versioning](http://semver.org/).
+
+## [Unreleased]
+
+
+## [0.1.0-alfa] - 2017-03-18
+### Added
+- Assign static IP address.
+- Send a packet with a state of the analog pins.
+- Activate digital pins upon receiving a packet.
+- Send a ACK packet.
+- ChangeLog file.
+- Control SD card slave select pin on Ethernet shield.
+
+## Changed
+- Move Simple Protocol files to lib directory.
+- Name of file SimpleProtocol.h to SimpleProtocol.hpp.
+
+### Fixed
+- Reset currenDeliveryAttempt counter.
