@@ -118,6 +118,16 @@ void SimpleProtocol::sendPacket( EthernetUDP *udp, Packet_t packet, IPAddress ip
   udp->beginPacket( ip, port );
   udp->write( buffer, sizeof( buffer ));
   udp->endPacket();
+
+  //#if DEBUG >= 1
+    Serial.println( F( "Sent packet:" ));
+    Serial.print( F( "type: " ));
+    Serial.println( packet_.type, HEX );
+    Serial.print( F( "sequence: " ));
+    Serial.println( packet_.sequence );
+    Serial.print( F( "data: " ));
+    Serial.println( packet_.data, BIN );
+  //#endif
 }
 /*******************************************************************************
  *    Function: sendPacket
