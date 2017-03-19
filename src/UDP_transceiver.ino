@@ -47,6 +47,7 @@
 #include <EthernetUdp.h>
 
 #include "SimpleProtocol.hpp"
+#include "CircularBuffer.hpp"
 
 #define DEBUG 1
 #define MODUL 0
@@ -77,7 +78,7 @@ const uint8_t INPUT_PINS_PINC[] = { PINC0, PINC1, PINC2, PINC3, PINC4, PINC5 };
 const uint8_t INPUT_PINS_PCMSK1[] = { PCINT8, PCINT9, PCINT10, PCINT11, PCINT12, PCINT13 };
 const uint8_t OUTPUT_PINS[] = { 2, 3, 5, 6, 7, 8 };
 const uint8_t SD_CARD_SS = 4;
-uint8_t pinChangeFlag = 0;
+volatile uint8_t pinChangeFlag = 0;
 
 SimpleProtocol protocol;
 Packet_t packet;
@@ -88,8 +89,11 @@ Ack_t ackFlag = ACK_RECEIVED;
 uint8_t data;
 uint16_t sequence;
 
+const uint8_t CIRCULAR_BUFFER_SIZE = 10;
+CircularBuffer< Packet_t, CIRCULAR_BUFFER_SIZE > sendBuffer;
+
 //const uint16_t DELIVERY_TIMEOUT = 10000;  // time for delivery confirmation in ms
-const uint16_t DELIVERY_DELAY = 500;        // time delay between attempting on delivery
+const uint16_t DELIVERY_DELAY = 2000;        // time delay between attempting on delivery
 const uint8_t DELIVERY_ATTEMPT = 20;        // number of attempt on delivery
 uint16_t currentDeliveryTime;
 uint8_t currentDeliveryAttempt = 0;
@@ -126,42 +130,49 @@ void setup()
   digitalWrite( SD_CARD_SS, HIGH );
 
   #if DEBUG >= 1
-    Serial.println( F( "End initialization !"));
+    Serial.println( F( "End initialization !" ));
   #endif
 }
 
 void loop() {
-  if (pinChangeFlag) {
-    data = PINC;
-    sequence = (uint16_t)( millis() >> 7 );
-    protocol.sendPostDataPacket( &Udp, data, sequence, REMOTE_IP, REMOTE_PORT );
-
+  if ( pinChangeFlag ) {
+    packet.data = PINC;
+    packet.type = TYPE_POST_DATA;
+    packet.sequence = (uint16_t)( millis() >> 1 );
+    sendBuffer.push( packet );
     pinChangeFlag = 0;
-    ackFlag = ACK_NO_RECEIVED;
-    currentDeliveryTime = (uint16_t)millis();
-    currentDeliveryAttempt++;
   }
 
-  if ( ackFlag == ACK_TIMEOUT ) {
-    // send request packet
-  }
+  if ( sendBuffer.isNonEmpty() ) {
+    if ( ackFlag == ACK_RECEIVED ) {
+      protocol.sendPacket( &Udp, sendBuffer.read(), REMOTE_IP, REMOTE_PORT );
+      ackFlag = ACK_NO_RECEIVED;
+      currentDeliveryTime = (uint16_t)millis();
+      currentDeliveryAttempt++;
+    }
 
-  if (( ackFlag == ACK_NO_RECEIVED ) && (( DELIVERY_DELAY + currentDeliveryTime ) <= millis() )) {
-    #if DEBUG >= 1
-      Serial.println( F( "ACK packet no received." ));
-    #endif
+    if (( ackFlag == ACK_NO_RECEIVED ) && (( ( uint16_t )millis() - currentDeliveryTime ) >= DELIVERY_DELAY )) {
+      #if DEBUG >= 1
+        Serial.println( F( "ACK packet no received !!!!!!!!!!" ));
+        Serial.println();
+      #endif
 
-    protocol.sendPostDataPacket( &Udp, data, sequence, REMOTE_IP, REMOTE_PORT );
-    ackFlag = ACK_NO_RECEIVED;
-    currentDeliveryTime = (uint16_t)millis();
-    currentDeliveryAttempt++;
-    if ( currentDeliveryAttempt >= DELIVERY_ATTEMPT )
-      ackFlag = ACK_TIMEOUT;
+      protocol.sendPacket( &Udp, sendBuffer.read(), REMOTE_IP, REMOTE_PORT );
+      ackFlag = ACK_NO_RECEIVED;
+      currentDeliveryTime = (uint16_t)millis();
+      currentDeliveryAttempt++;
+      if ( currentDeliveryAttempt >= DELIVERY_ATTEMPT )
+        ackFlag = ACK_TIMEOUT;
 
-    #if DEBUG >= 1
-      Serial.print( currentDeliveryAttempt );
-      Serial.println( F( ". attempt for delivery packet." ));
-    #endif
+      #if DEBUG >= 1
+        Serial.print( currentDeliveryAttempt );
+        Serial.println( F( ". attempt for delivery packet !!!!!!!!!!!!!!!!" ));
+      #endif
+    }
+
+    if ( ackFlag == ACK_TIMEOUT ) {
+      // send request packet
+    }
   }
 
   // If there's data available, read a packet
@@ -186,13 +197,14 @@ void loop() {
       protocol.receivePacket( &Udp, receiveBuffer, &receivePacket, sizeReceivePacket );
 
     #if DEBUG >= 1
-      Serial.println( F( "Received packet:" ));
+      Serial.println( F( "<<<<<<<<<< Received packet:" ));
       Serial.print( F( "type: " ));
       Serial.println( receivePacket.type, HEX );
       Serial.print( F( "sequence: " ));
       Serial.println( receivePacket.sequence );
       Serial.print( F( "data: " ));
       Serial.println( receivePacket.data, BIN );
+      Serial.println();
     #endif
 
     analysePacket();
@@ -220,12 +232,17 @@ void analysePacket( void )
     } break;
 
     case TYPE_ACK: {
-      if ( receivePacket.sequence == sequence ) {
-        ackFlag = ACK_RECEIVED;
-        currentDeliveryAttempt = 0;
-        #if DEBUG >= 1
-          Serial.println( F( "Received ACK packet." ));
-        #endif
+      if ( sendBuffer.isNonEmpty() ) {
+        packet = sendBuffer.read();
+        if ( receivePacket.sequence == packet.sequence ) {
+          sendBuffer.pop();
+          ackFlag = ACK_RECEIVED;
+          currentDeliveryAttempt = 0;
+          #if DEBUG >= 1
+            Serial.println( F( "********** Received ACK packet." ));
+            Serial.println();
+          #endif
+        }
       }
     } break;
   }
