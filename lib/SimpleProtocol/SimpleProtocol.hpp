@@ -61,9 +61,7 @@ private:
   Packet_t packet_;
   //sendBuffer_t sendBuffer_;
   //Buffer_t receiveBuffer_;
-  void sendPacket( EthernetUDP *udp, Packet_t packet );
-  void sendPacket( EthernetUDP *udp, Packet_t packet, IPAddress ip, uint16_t port );
-
+  
 public:
   SimpleProtocol();
   ~SimpleProtocol();
@@ -72,6 +70,8 @@ public:
   void sendAckPacket( EthernetUDP *udp, Packet_t packet );
   uint8_t sendPostDataPacket( EthernetUDP *udp, uint8_t data, uint16_t seq, IPAddress ip, uint16_t port );
   uint8_t sendPostDataPacketBuffer( EthernetUDP *udp, uint8_t data, IPAddress ip, uint16_t port );
+  void sendPacket( EthernetUDP *udp, Packet_t packet );
+  void sendPacket( EthernetUDP *udp, Packet_t packet, IPAddress ip, uint16_t port );
   void receivePacket( EthernetUDP *udp, uint8_t * buffer, Packet_t * packet, uint8_t size);
 };
 
