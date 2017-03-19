@@ -42,6 +42,11 @@ void SimpleProtocol::sendAckPacket( EthernetUDP *udp, Packet_t packet )
 {
   packet.type = TYPE_ACK;
   sendPacket( udp, packet );
+
+  //#if DEBUG >= 1
+    Serial.println( F( "*** ACK packet has sent." ));
+    Serial.println();
+  //#endif
 }
 
 /*******************************************************************************
@@ -61,12 +66,12 @@ uint8_t SimpleProtocol::sendPostDataPacket( EthernetUDP *udp, uint8_t data, uint
   packet_.data = data;
 
   //#if DEBUG >= 1
-    Serial.println( F( "Sent packet:" ));
+    Serial.println( F( "Sent packet >>>>>>>>>> :" ));
     Serial.print( F( "type: " ));
-    Serial.println( packet_.type, HEX );
-    Serial.print( F( "sequence: " ));
-    Serial.println( packet_.sequence );
-    Serial.print( F( "data: " ));
+    Serial.print( packet_.type, HEX );
+    Serial.print( F( "   sequence: " ));
+    Serial.print( packet_.sequence );
+    Serial.print( F( "   data: " ));
     Serial.println( packet_.data, BIN );
   //#endif
 
@@ -120,13 +125,13 @@ void SimpleProtocol::sendPacket( EthernetUDP *udp, Packet_t packet, IPAddress ip
   udp->endPacket();
 
   //#if DEBUG >= 1
-    Serial.println( F( "Sent packet:" ));
+    Serial.println( F( "Sent packet >>>>>>>>>> :" ));
     Serial.print( F( "type: " ));
-    Serial.println( packet_.type, HEX );
-    Serial.print( F( "sequence: " ));
-    Serial.println( packet_.sequence );
-    Serial.print( F( "data: " ));
-    Serial.println( packet_.data, BIN );
+    Serial.print( packet.type, HEX );
+    Serial.print( F( "   sequence: " ));
+    Serial.print( packet.sequence );
+    Serial.print( F( "   data: " ));
+    Serial.println( packet.data, BIN );
   //#endif
 }
 /*******************************************************************************
