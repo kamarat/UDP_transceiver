@@ -67,6 +67,9 @@
   const uint16_t REMOTE_PORT = 1234;
 #endif
 
+const IPAddress GATEWAY( 172,16,1,100 );
+const IPAddress SUBNET( 255,255,255,0 );
+
 // An EthernetUDP instance to let us send and receive packets over UDP
 EthernetUDP Udp;
 IPAddress ipRemote;
