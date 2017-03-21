@@ -48,6 +48,7 @@
 
 #include "SimpleProtocol.hpp"
 #include "CircularBuffer.hpp"
+#include "WebServer.h"
 
 #define DEBUG 1
 #define MODUL 0
@@ -73,6 +74,8 @@ const IPAddress SUBNET( 255,255,255,0 );
 // An EthernetUDP instance to let us send and receive packets over UDP
 EthernetUDP Udp;
 IPAddress ipRemote;
+
+EthernetServer Server(80);
 
 const uint8_t INPUT_PINS[] = { A0, A1, A2, A3, A4, A5 };
 const uint8_t INPUT_PINS_MASK = 0x3F;
@@ -115,9 +118,10 @@ void setup()
     Serial.println( F( "Start initialization !"));
   #endif
 
-  // Start the Ethernet and UDP:
+  // Start the Ethernet UDP and Web Server
   Ethernet.begin( MAC, IP_LOCAL );
   Udp.begin( LOCAL_PORT );
+  Server.begin();
 
   for ( uint8_t pin = 0; pin < sizeof(INPUT_PINS); pin++ )
     pinMode( INPUT_PINS[ pin ], INPUT_PULLUP);
@@ -213,6 +217,8 @@ void loop() {
     analysePacket();
   }
   delay(10);
+
+  webServer( &Server );
 }
 
 ISR( PCINT1_vect )
