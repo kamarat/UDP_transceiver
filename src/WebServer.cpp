@@ -38,7 +38,7 @@ void webServer( EthernetServer * s )
   EthernetClient client = s->available();
   if (client) {
     #if DEBUG >= 1
-      Serial.println("new client");
+      Serial.println( F( "New client." ));
     #endif
 
     // an http request ends with a blank line
@@ -93,7 +93,7 @@ void webServer( EthernetServer * s )
     client.stop();
 
     #if DEBUG >= 1
-      Serial.println( "client disconnected" );
+      Serial.println( F( "Client disconnected." ));
     #endif
   }
 }
