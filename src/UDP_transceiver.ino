@@ -8,7 +8,8 @@
  * @author: mr.nobody
  * @date:   January 2017 - March 2017
  *
- * @version: [0.1.0-alfa] - 2017-03-18
+ * @version:  [0.1.0] - 2017-03-22
+ *            [0.1.0-alfa] - 2017-03-18
  *
  * mr.nobody (cleft) 2017
  *
@@ -91,6 +92,7 @@ uint16_t sequence;
 //const uint16_t DELIVERY_TIMEOUT = 10000;  // time for delivery confirmation in ms
 const uint16_t DELIVERY_DELAY = 500;        // time delay between attempting on delivery
 const uint8_t DELIVERY_ATTEMPT = 20;        // number of attempt on delivery
+uint8_t deliveryTimeoutMultiplier = 1;
 uint16_t currentDeliveryTime;
 uint8_t currentDeliveryAttempt = 0;
 
@@ -144,9 +146,12 @@ void loop() {
 
   if ( ackFlag == ACK_TIMEOUT ) {
     // send request packet
+    ackFlag = ACK_NO_RECEIVED;
+    deliveryTimeoutMultiplier++;
+    currentDeliveryAttempt = 0;
   }
 
-  if (( ackFlag == ACK_NO_RECEIVED ) && (( DELIVERY_DELAY + currentDeliveryTime ) <= millis() )) {
+  if (( ackFlag == ACK_NO_RECEIVED ) && (( ( uint16_t )millis() - currentDeliveryTime ) >= ( DELIVERY_DELAY * deliveryTimeoutMultiplier ))) {
     #if DEBUG >= 1
       Serial.println( F( "ACK packet no received." ));
     #endif
@@ -223,6 +228,7 @@ void analysePacket( void )
       if ( receivePacket.sequence == sequence ) {
         ackFlag = ACK_RECEIVED;
         currentDeliveryAttempt = 0;
+        deliveryTimeoutMultiplier = 1;
         #if DEBUG >= 1
           Serial.println( F( "Received ACK packet." ));
         #endif
