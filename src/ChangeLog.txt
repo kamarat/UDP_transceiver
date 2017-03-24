@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 
+## [0.1.0] - 2017-03-22
+### Fixed
+- Repeating an attempt to delivery a packet after timeout with multiplication delivery delay.
+
 ## [0.1.0-alfa] - 2017-03-18
 ### Added
 - Assign static IP address.
