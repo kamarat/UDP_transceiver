@@ -25,23 +25,23 @@ unsigned long connectTime[ MAX_SOCK_NUM] ;  // in w5100.h is #define MAX_SOCK_NU
  *   Parameter: none
  *      Return: int - free ram in bytes
  ******************************************************************************/
-/*int freeRam()
+int freeRam()
 {
   extern int __heap_start,*__brkval;
   int v;
   return (int)&v - (__brkval == 0 ? (int)&__heap_start : (int) __brkval);
-}*/
+}
 
 void webServer( EthernetServer * s )
 {
-  // listen for incoming clients
+  // Listen for incoming clients
   EthernetClient client = s->available();
   if (client) {
     #if DEBUG >= 1
       Serial.println( F( "New client." ));
     #endif
 
-    // an http request ends with a blank line
+    // An http request ends with a blank line
     boolean currentLineIsBlank = true;
     while (client.connected()) {
       if (client.available()) {
@@ -50,46 +50,49 @@ void webServer( EthernetServer * s )
           Serial.write(c);
         #endif
 
-        // if you've gotten to the end of the line (received a newline
-        // character) and the line is blank, the http request has ended,
-        // so you can send a reply
+        /* If you've gotten to the end of the line (received a newline
+         * character) and the line is blank, the http request has ended,
+         * so you can send a reply
+         */
         if ( c == '\n' && currentLineIsBlank ) {
-          // send a standard http response header
+          // Send a standard http response header
           client.println( "HTTP/1.1 200 OK" );
           client.println( "Content-Type: text/html" );
           client.println( "Connection: close" );  // the connection will be closed after completion of the response
-          client.println( "Refresh: 5" );  // refresh the page automatically every 5 sec
+          client.println( "Refresh: 5" );         // refresh the page automatically every 5 sec
           client.println();
           client.println( "<!DOCTYPE HTML>" );
           client.println( "<html>" );
 
-          // body
-          client.println( "This is body." );
-          client.println( PINC );
-          for ( int i = 0; i < 6; i++ ) {
-            int status = analogRead( i );
-            client.print( "<br>" );
+          // Body
+          client.print( "<h2>UDP transciever base on Arduino.</h2>" );
+          client.print( "<h3>State of inputs:</h3>" );
+          for ( int i = 0; i < 6; i++ ) {;
             client.print( "Input " );
-            client.print( i );
+            client.print( i + 1 );
             client.print(" is ");
-            client.println( status );
+            client.println(( PINC >> i ) & 0x01 );
+            client.print( "<br>" );
           }
 
+          client.print( "<h3>Free memory in bytes: </h3>" );
+          //client.print( "<br>" );
+          client.println( freeRam() );
           client.println( "</html>" );
           break;
         }
         if (c == '\n') {
-          // you're starting a new line
+          // You're starting a new line
           currentLineIsBlank = true;
         } else if (c != '\r') {
-          // you've gotten a character on the current line
+          // You've gotten a character on the current line
           currentLineIsBlank = false;
         }
       }
     }
-    // give the web browser time to receive the data
+    // Give the web browser time to receive the data
     delay(1);
-    // close the connection:
+    // Close the connection:
     client.stop();
 
     #if DEBUG >= 1
