@@ -7,6 +7,8 @@
 #include <utility/w5100.h>
 #include <utility/socket.h>
 
+#define DEBUG 1
+
 extern void webServer( EthernetServer * s );
 
 #endif  // #define WEB_SERVER_H
